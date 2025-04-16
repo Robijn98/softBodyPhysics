@@ -27,6 +27,7 @@ class ball():
         self.position = Vector2(position)
         self.velocity = Vector2(0, 0)
         self.colour=(255,0,0)
+        
 
 
 class distance_constraint():
@@ -35,20 +36,46 @@ class distance_constraint():
         self.p2 = p2
         self.rest_length = 100
         self.K = 100
+        self.damping = 0.1
 
-    def constrain(self):
-        delta = self.p2.position - self.p1.position
+    def constrain(self, dt, gravity):
+        p0 = self.p1.position
+        p1 = self.p2.position
+        v0 = self.p1.velocity
+        v1 = self.p2.velocity
+
+        delta = p1 - p0
         distance = delta.length()
+        if distance == 0:
+            return
 
-        required_delta = delta * (self.rest_length / distance)
-        force = -self.K * (required_delta - delta)
+        direction = delta / distance
+        required_delta = direction * self.rest_length
 
-        self.p1.force += force 
-        self.p2.force -= force
+        spring_force = 100 
+        force = spring_force * (required_delta - delta)
+
+        self.p1.velocity -= force * dt
+        self.p2.velocity += force * dt
+
+        #add gravity
+        self.p1.velocity += gravity * dt
+        self.p2.velocity += gravity * dt
+
+        # Damping
+        vrel = (v1 - v0).dot(direction)
+        spring_damping = 5 
+        damping_factor = math.exp(-spring_damping * dt)
+        new_vrel = vrel * damping_factor
+        vrel_delta = new_vrel - vrel
+
+        damping_force = direction * (vrel_delta / 2.0)
+
+        self.p1.velocity -= damping_force
+        self.p2.velocity += damping_force
+
 
     
-
-        
 class Engine():
     def __init__(self, gravity, radius=5):
         self.radius = radius
@@ -62,14 +89,12 @@ class Engine():
     def update(self, dt):
         for p in self.balls:
             p.force = Vector2(0, 0)
+        #constraints
 
         for c in self.constraints:
-            c.constrain()
-
+            c.constrain(dt, self.gravity)
 
         for p in self.balls:
-            total_force = self.gravity + 0.5 * p.force
-            p.velocity += total_force * dt
             p.position += p.velocity * dt
 
             #collisions
