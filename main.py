@@ -19,8 +19,6 @@ pygame.mouse.set_visible(True)
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 clock = pygame.time.Clock()
 
-screen.fill((0, 0, 0))
-
 pygame.display.update()
 
 
@@ -31,10 +29,31 @@ class ball():
         self.colour=(255,0,0)
 
 
+class distance_constraint():
+    def __init__(self, p1, p2, distance):
+        self.p1 = p1
+        self.p2 = p2
+        self.rest_length = 100
+        self.K = 100
+
+    def constrain(self):
+        delta = self.p2.position - self.p1.position
+        distance = delta.length()
+
+        required_delta = delta * (self.rest_length / distance)
+        force = -self.K * (required_delta - delta)
+
+        self.p1.force += force 
+        self.p2.force -= force
+
+    
+
+        
 class Engine():
     def __init__(self, gravity, radius=5):
         self.radius = radius
         self.balls = []
+        self.constraints = []
         self.gravity = Vector2(gravity)
         self.selected = None
         self.mouse_pos = Vector2(0, 0)
@@ -42,9 +61,18 @@ class Engine():
 
     def update(self, dt):
         for p in self.balls:
-            p.velocity += self.gravity * dt
+            p.force = Vector2(0, 0)
+
+        for c in self.constraints:
+            c.constrain()
+
+
+        for p in self.balls:
+            total_force = self.gravity + 0.5 * p.force
+            p.velocity += total_force * dt
             p.position += p.velocity * dt
 
+            #collisions
             # Floor
             if p.position.y > SCREEN_HEIGHT - self.radius:
                 p.position.y = SCREEN_HEIGHT - self.radius
@@ -78,9 +106,6 @@ class Engine():
                 if abs(p.velocity.x) < 2:
                     p.velocity.x = 0
 
-
-
-
         self.resolve_collision()
 
     def resolve_collision(self):
@@ -99,15 +124,21 @@ class Engine():
 
 
 
+
 #creating engine and ball
 engine = Engine(gravity=(0, 500))
 
-for i in range(0, 1):
-    x = random.randint(200, 400)
-    y = random.randint(200, 500)
-    position = Vector2(x, y)
-    engine.balls.append(ball(position=position))
-    
+start_pos = Vector2(300, 300)
+engine.balls.append(ball(position=start_pos))
+engine.balls.append(ball(position=start_pos + Vector2(30, 0))) 
+
+#apply constraints
+# apply constraints
+rest_length = 30  
+for i in range(len(engine.balls)-1):
+    d = distance_constraint(engine.balls[i], engine.balls[i+1], rest_length)
+    engine.constraints.append(d)
+
 
 run = True
 
@@ -142,8 +173,14 @@ while run:
     screen.fill((0, 0, 0))
 
     for b in engine.balls:
-        pygame.draw.circle(screen,(255,255,255), b.position, 5)
+        pygame.draw.circle(screen,b.colour, b.position, 5)
+        pygame.draw.circle(screen, b.colour, b.position, 5, 1)
+    
+    for constraint in engine.constraints:
+        pygame.draw.line(screen, (255, 255, 255), constraint.p1.position, constraint.p2.position, 1)
+    
     pygame.display.update()
+
 
 
 pygame.quit()
