@@ -39,7 +39,7 @@ class distance_constraint():
         self.spring_force = 5000
 
     def constrain(self, dt, gravity):
-        
+ 
         p0 = self.p1.position
         p1 = self.p2.position
         v0 = self.p1.velocity
@@ -99,93 +99,119 @@ class Engine():
         self.resolve_collision()
 
     def resolve_collision(self):
+        
         radius = 5
-        for i, ball1 in enumerate(self.balls):
-            for j, ball2 in enumerate(self.balls[i+1:], i+1):
-                delta = ball2.position - ball1.position
-                distance = delta.length()
-                min_distance = radius * 2
-               
-                if distance < min_distance:
+        dt = 1 / 60
+        restitution = 0.5
+        friction = 0.8
 
-                    normal = delta.normalize()
-                    overlap = (min_distance - distance) * 0.5
-
-                    ball1.position -= normal * overlap
-                    ball2.position += normal * overlap
-
-                    relative_velocity = ball2.velocity - ball1.velocity
-                    normal_velocity = relative_velocity.dot(normal)
-                    tangent_velocity = relative_velocity - normal * normal_velocity
-
-                    resitution = 0.5
-                    ball1.velocity += normal * normal_velocity * resitution
-                    ball2.velocity -= normal * normal_velocity * resitution
-
-                    friction_coefficient = 0.8
-                    ball1.velocity += tangent_velocity * friction_coefficient * 0.5
-                    ball2.velocity -= tangent_velocity * friction_coefficient * 0.5
-
-            #collision with environemnt
+        # only loop each unordered pair once
+    # ----- ball–environment collisions (edge‑based) -----
+        mass_ball = 1.0
+        mass_edge = 2.0
+        for ball in self.balls:
+            
+            collision_with_environment(ball)
+            
+            #prevent self collision
             for obj in self.objects:
-                if ball1 not in obj:
-                    if point_in_object(ball1.position, obj):
-                        #move the ball outside the object
-                        #find the side of the object that is closest to the ball
-                        closest_side = []
-                        for point in obj:
-                            vector = ball1.position - point.position
-                            distance = vector.length()
-                            #find the two closest points
-                            if len(closest_side) < 2:
-                                closest_side.append(point)
-                            else:
-                                if distance < (ball1.position - closest_side[0].position).length():
-                                    closest_side[0] = point
-                                elif distance < (ball1.position - closest_side[1].position).length():
-                                    closest_side[1] = point
+                if ball in obj:
+                    continue  
+
+                # loop every edge 
+                for i in range(len(obj)):
+                    A = obj[i]
+                    B = obj[(i+1) % len(obj)]
+                    AB = B.position - A.position
+
+                    # project center onto AB:
+                    t = (ball.position - A.position).dot(AB)
+                    denom = AB.length_squared() + 1e-6
+                    t /= denom
+                    t = max(0.0, min(1.0, t))
+
+                    closest = A.position + AB * t
+                    diff    = ball.position - closest
+                    dist    = diff.length()
+                    penetration = radius - dist
+
+                    if penetration <= 0:
+                        continue  # no overlap with this edge
+
+                    # collision normal
+                    if dist == 0:
+                        # fallback: take a perp to AB
+                        n = AB.normalize().rotate(90)
+                    else:
+                        n = diff.normalize()
+
+                    # relative velocity at the contact point
+                    v_edge  = A.velocity * (1-t) + B.velocity * t
+                    rel_vel = ball.velocity - v_edge
+                    vn = rel_vel.dot(n)
+
+                    print(f"vn: {vn}, penetration: {penetration}, t: {t}, A: {A.position}, B: {B.position}")
+                    # only apply impulse if closing
+                    if vn < 0:
+                        inv_m_edge = ((1-t)**2 + t**2) / mass_edge
+                        inv_m = mass_ball + inv_m_edge
+
+                        # normal impulse magnitude
+                        numerator = -(1 + restitution) * vn
+                        denominator = (1/ 2) + (i + t) ** 2 * (1/6)
+                        j_mag = numerator / denominator
                         
-                        
-                            
+                        j = n * j_mag
+
+                        # apply to ball and edge endpoints
+                        ball.velocity += j / mass_ball
+                        A.velocity    -= j * (1-t)  /mass_edge
+                        B.velocity    -= j *    t  /mass_edge
+
+                    if penetration > 0.01:
+                        # apply penetration correction
+                        n = n.rotate(90)
+                        correction = n * (penetration / inv_m)
+                        ball.position += correction / mass_ball
+                        A.position    -= correction * (1-t) / mass_edge
+                        B.position    -= correction *    t  / mass_edge
 
 
 
-                        
+def collision_with_environment(ball):
+    radius = 5
+    # Floor
+    if ball.position.y > SCREEN_HEIGHT - radius:
+        ball.position.y = SCREEN_HEIGHT - radius
 
+        if ball.velocity.y > 0:
+            ball.velocity.y *= -0.5 
 
+        if abs(ball.velocity.y) < 1:
+            ball.velocity.y = 0
 
-            # Floor
-            if ball1.position.y > SCREEN_HEIGHT - self.radius:
-                ball1.position.y = SCREEN_HEIGHT - self.radius
+        ball.velocity.x *= 0.9
+        if abs(ball.velocity.x) < 0.5:
+            ball.velocity.x = 0
 
-                if ball1.velocity.y > 0:
-                    ball1.velocity.y *= -0.5 
+    # Ceiling
+    if ball.position.y < radius:
+        ball.position.y = radius
+        ball.velocity.y *= -0.8
 
-                if abs(ball1.velocity.y) < 1:
-                    ball1.velocity.y = 0
+    # Right wall
+    if ball.position.x > SCREEN_WIDTH - radius:
+        ball.position.x = SCREEN_WIDTH - radius
+        ball.velocity.x *= -0.8
+        if abs(ball.velocity.x) < 2:
+            ball.velocity.x = 0
 
-                ball1.velocity.x *= 0.9
-                if abs(ball1.velocity.x) < 0.5:
-                    ball1.velocity.x = 0
-           
-            # Ceiling
-            if ball1.position.y < self.radius:
-                ball1.position.y = self.radius
-                ball1.velocity.y *= -0.8
-
-            # Right wall
-            if ball1.position.x > SCREEN_WIDTH - self.radius:
-                ball1.position.x = SCREEN_WIDTH - self.radius
-                ball1.velocity.x *= -0.8
-                if abs(ball1.velocity.x) < 2:
-                    ball1.velocity.x = 0
-
-            # Left wall
-            if ball1.position.x < self.radius:
-                ball1.position.x = self.radius
-                ball1.velocity.x *= -0.8
-                if abs(ball1.velocity.x) < 2:
-                    ball1.velocity.x = 0
+    # Left wall
+    if ball.position.x < radius:
+        ball.position.x = radius
+        ball.velocity.x *= -0.8
+        if abs(ball.velocity.x) < 2:
+            ball.velocity.x = 0
             
 
 def point_in_object(point, object):
@@ -204,17 +230,58 @@ def point_in_object(point, object):
 
     return inside
 
+def ball_on_ball_collision(ball1, edge=[]):
+    radius = 5
+    print(f"ball1: {ball1.position}, edge: {[b.position for b in edge]}")
+    # Check which ball from edge is closest to ball1
+    ball2 = edge[0]
+    closest_distance = (ball1.position - ball2.position).length()
+    for ball in edge:
+        distance = (ball1.position - ball.position).length()
+        if distance < closest_distance:
+            closest_distance = distance
+            ball2 = ball
+
+    delta = ball2.position - ball1.position
+    distance = delta.length()
+    min_distance = radius * 2
+    if distance == 0:
+        return
+
+
+    if distance < min_distance:
+        # Collision resolution
+        normal = delta.normalize()
+        overlap = (min_distance - distance) * 0.5
+
+        ball1.position -= normal * overlap
+        ball2.position += normal * overlap
+
+        relative_velocity = ball2.velocity - ball1.velocity
+        normal_velocity = relative_velocity.dot(normal)
+        tangent_velocity = relative_velocity - normal * normal_velocity
+
+        resitution = 0.5
+        ball1.velocity += normal * normal_velocity * resitution
+        ball2.velocity -= normal * normal_velocity * resitution
+
+        friction_coefficient = 0.8
+        ball1.velocity += tangent_velocity * friction_coefficient * 0.5
+        ball2.velocity -= tangent_velocity * friction_coefficient * 0.5
+
+
+    print("balls collided succesfully")
 
 
 def create_formations():
-    #\square formation
+    #square formation
     square = []
     start_pos = Vector2(300, 300)
     engine.balls.append(ball(position=start_pos))
     engine.balls.append(ball(position=start_pos + Vector2(30, 0))) 
     engine.balls.append(ball(position=start_pos + Vector2(30, 30)))
-    engine.balls.append(ball(position=start_pos + Vector2(0, 30)))
-    for i in range(4):
+    #engine.balls.append(ball(position=start_pos + Vector2(0, 30)))
+    for i in range(3):
         square.append(engine.balls[i])
     engine.objects.append(square)
     print(engine.balls[0])
@@ -225,14 +292,14 @@ def create_formations():
     engine.constraints.append(d)
     d = distance_constraint(engine.balls[1], engine.balls[2], rest_length)
     engine.constraints.append(d)
-    d = distance_constraint(engine.balls[2], engine.balls[3], rest_length)
-    engine.constraints.append(d)
-    d = distance_constraint(engine.balls[3], engine.balls[0], rest_length)
-    engine.constraints.append(d)
     d = distance_constraint(engine.balls[0], engine.balls[2], rest_length)
     engine.constraints.append(d)
-    d = distance_constraint(engine.balls[1], engine.balls[3], rest_length)
-    engine.constraints.append(d)
+    # d = distance_constraint(engine.balls[3], engine.balls[0], rest_length)
+    # engine.constraints.append(d)
+    # d = distance_constraint(engine.balls[0], engine.balls[2], rest_length)
+    # engine.constraints.append(d)
+    # d = distance_constraint(engine.balls[1], engine.balls[3], rest_length)
+    # engine.constraints.append(d)
 
     #create balls in a triangle formation
     triangle = []
@@ -240,19 +307,20 @@ def create_formations():
     engine.balls.append(ball(position=start_pos))
     engine.balls.append(ball(position=start_pos + Vector2(-50, -100))) 
     engine.balls.append(ball(position=start_pos + Vector2(50, -100)))
+    
 
-    for i in range(4, 7):
+    for i in range(3, 5):
         triangle.append(engine.balls[i])
     engine.objects.append(triangle)
 
     #triangle formation
     #apply constraints
     rest_length = 30  
+    d = distance_constraint(engine.balls[3], engine.balls[4], rest_length)
+    engine.constraints.append(d)
     d = distance_constraint(engine.balls[4], engine.balls[5], rest_length)
     engine.constraints.append(d)
-    d = distance_constraint(engine.balls[5], engine.balls[6], rest_length)
-    engine.constraints.append(d)
-    d = distance_constraint(engine.balls[6], engine.balls[4], rest_length)
+    d = distance_constraint(engine.balls[5], engine.balls[3], rest_length)
     engine.constraints.append(d)
 
 
