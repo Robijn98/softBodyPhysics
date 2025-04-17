@@ -5,3 +5,4 @@ __pycache__/
 build/
 .venv
 test.py
+__init__.py
