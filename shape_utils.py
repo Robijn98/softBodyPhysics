@@ -13,9 +13,11 @@ class ball():
 
 def create_formations(engine):
 
-    # create_square(engine, start_pos=Vector2(100, 100), size=30)
-    # create_triangle(engine, start_pos=Vector2(300, 300), size=30)
-    create_circle(engine, start_pos=Vector2(500, 500), size=30, vertices=6)
+    create_triangle(engine, start_pos=Vector2(300, 300), size=30)
+    create_square(engine, start_pos=Vector2(100, 100), size=30)
+    create_square(engine, start_pos=Vector2(200, 200), size=30)
+    #create_triangle(engine, start_pos=Vector2(400, 400), size=30)
+    #create_circle(engine, start_pos=Vector2(500, 500), size=30, vertices=6)
 
 
 
@@ -60,6 +62,7 @@ def create_triangle(engine, start_pos = Vector2(100, 100), size = 30):
     
     for i in range(3):
         triangle.append(engine.balls[i])
+    
     engine.objects.append(triangle)
 
     ball_count = len(engine.balls) - 3
@@ -87,6 +90,7 @@ def create_circle(engine, start_pos = Vector2(100, 100), size = 30, vertices = 1
 
     #create one ball in the center of the circle
     engine.balls.append(ball(position=start_pos))
+    
     circle.append(engine.balls[vertices])
 
     engine.objects.append(circle)
