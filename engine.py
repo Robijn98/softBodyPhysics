@@ -4,7 +4,7 @@ import math
 import random
 import sys
 from settings import *
-from collisions import  resolve_collision
+from collisions import resolve_collision
 
 class Engine():
     def __init__(self, gravity, radius=5):

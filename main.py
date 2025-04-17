@@ -3,12 +3,13 @@ from pygame.math import Vector2
 import math
 import sys
 from shape_utils import create_formations, ball
-pygame.init()
 from settings import *
 from engine import Engine
 
 
 # set up the screen
+pygame.init()
+
 pygame.display.set_caption("2D soft body simulation")
 pygame.mouse.set_visible(True)
 
@@ -16,8 +17,6 @@ screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 clock = pygame.time.Clock()
 
 pygame.display.update()
-
-
 
 #creating engine and ball
 engine = Engine(gravity=(0, 500))
@@ -49,8 +48,7 @@ while run:
                 engine.prev_mouse_pos = Vector2(0, 0)
                 for b in engine.objects[0]:
                     b.colour = (255, 0, 0)
-                for b in engine.objects[1]:
-                    b.colour = (0, 0, 255)
+
 
 
 
