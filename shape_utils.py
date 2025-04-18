@@ -4,7 +4,7 @@ from spring import distance_constraint
 import math 
 
 
-class ball():
+class Ball():
     def __init__(self, position):
         self.position = Vector2(position)
         self.velocity = Vector2(0, 0)
@@ -15,7 +15,7 @@ def create_formations(engine):
 
     create_triangle(engine, start_pos=Vector2(300, 300), size=30)
     create_square(engine, start_pos=Vector2(100, 100), size=30)
-    create_square(engine, start_pos=Vector2(200, 200), size=30)
+    #create_square(engine, start_pos=Vector2(200, 200), size=30)
     #create_triangle(engine, start_pos=Vector2(400, 400), size=30)
     #create_circle(engine, start_pos=Vector2(500, 500), size=30, vertices=6)
 
@@ -25,10 +25,10 @@ def create_square(engine, start_pos = Vector2(100, 100), size = 30):
     square = []
 
     #create balls in a square formation
-    engine.balls.append(ball(position=start_pos))
-    engine.balls.append(ball(position=start_pos + Vector2(size, 0))) 
-    engine.balls.append(ball(position=start_pos + Vector2(size, size)))
-    engine.balls.append(ball(position=start_pos + Vector2(0, size)))
+    engine.balls.append(Ball(position=start_pos))
+    engine.balls.append(Ball(position=start_pos + Vector2(size, 0))) 
+    engine.balls.append(Ball(position=start_pos + Vector2(size, size)))
+    engine.balls.append(Ball(position=start_pos + Vector2(0, size)))
     for i in range(3):
         square.append(engine.balls[i])
     engine.objects.append(square)
@@ -56,9 +56,9 @@ def create_triangle(engine, start_pos = Vector2(100, 100), size = 30):
     triangle = []
 
     #create balls in a triangle formation
-    engine.balls.append(ball(position=start_pos))
-    engine.balls.append(ball(position=start_pos + Vector2(-size, -size))) 
-    engine.balls.append(ball(position=start_pos + Vector2(size, -size)))
+    engine.balls.append(Ball(position=start_pos))
+    engine.balls.append(Ball(position=start_pos + Vector2(-size, -size))) 
+    engine.balls.append(Ball(position=start_pos + Vector2(size, -size)))
     
     for i in range(3):
         triangle.append(engine.balls[i])
@@ -84,12 +84,12 @@ def create_circle(engine, start_pos = Vector2(100, 100), size = 30, vertices = 1
         angle = i * (360 / vertices)
         x = start_pos.x + size * math.cos(math.radians(angle))
         y = start_pos.y + size * math.sin(math.radians(angle))
-        engine.balls.append(ball(position=Vector2(x, y)))
+        engine.balls.append(Ball(position=Vector2(x, y)))
         circle.append(engine.balls[i])
     
 
     #create one ball in the center of the circle
-    engine.balls.append(ball(position=start_pos))
+    engine.balls.append(Ball(position=start_pos))
     
     circle.append(engine.balls[vertices])
 

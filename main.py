@@ -2,7 +2,7 @@ import pygame
 from pygame.math import Vector2
 import math
 import sys
-from shape_utils import create_formations, ball
+from shape_utils import create_formations, Ball
 from settings import *
 from engine import Engine
 
@@ -33,7 +33,7 @@ while run:
         elif event.type == pygame.MOUSEBUTTONDOWN:
             mouse_pos = Vector2(pygame.mouse.get_pos())
             for b in engine.balls:
-                if(b.position - mouse_pos).length() < 50:
+                if(b.position - mouse_pos).length() < 7:
                     engine.selected = b
                     engine.prev_mouse_pos = mouse_pos
                     b.velocity = Vector2(0, 0)
@@ -48,6 +48,8 @@ while run:
                 engine.prev_mouse_pos = Vector2(0, 0)
                 for b in engine.objects[0]:
                     b.colour = (255, 0, 0)
+                for b in engine.objects[1]:
+                    b.colour = (0, 0, 255)
 
 
 
