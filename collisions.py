@@ -37,6 +37,7 @@ def collision_with_environment(ball):
             ball.velocity.x = 0
     
 
+
 def resolve_collision(balls, objects):
     
     radius = 5
@@ -55,23 +56,22 @@ def resolve_collision(balls, objects):
         
         #prevent self collision
         for obj in objects:
-            # if ball in obj:
-            #     continue
+            #print(f"pre if: {obj.name}")
+            if ball in obj.vertices:
+                continue
+            
+            #print(f"post if: {obj.name}")
 
             # loop every edge 
             dist = 1000
             closest_edge = (0, 0)
-            for i in range(len(obj)):
+            for i in range(len(obj.vertices)):
                 
                 #if any point of the object is inside the ball, ignore collision
-                if vertex_in_object(ball.position, obj):
-                    continue
 
-                # find the closest edge to the ball
-                # keep checking distance is bigger than radius
 
-                A = obj[i]
-                B = obj[(i+1) % len(obj)]
+                A = obj.vertices[i]
+                B = obj.vertices[(i+1) % len(obj.vertices)]
                 
                 AB = B.position - A.position
                 BE = ball.position - B.position
@@ -97,7 +97,7 @@ def resolve_collision(balls, objects):
                     mod = math.sqrt(x1**2 + y1**2)
                     t = abs(x1 * y2 - x2 * y1) / mod
 
-                if t < dist:
+                if t < dist and dist != 0:
                     dist = t
                     closest_edge = (A, B)
 
@@ -105,12 +105,8 @@ def resolve_collision(balls, objects):
                     # collision
                     print("Collision detected")
                     print(f"dist: {dist}, A: {A.position}, B: {B.position}")
-
-
-
-
-
-
+                    
+                    print(f"collision object: {obj.name}")
 
 
 

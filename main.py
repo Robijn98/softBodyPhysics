@@ -2,10 +2,9 @@ import pygame
 from pygame.math import Vector2
 import math
 import sys
-from shape_utils import create_formations, Ball
 from settings import *
 from engine import Engine
-
+from shape_utils import create_formations
 
 # set up the screen
 pygame.init()
@@ -19,8 +18,17 @@ clock = pygame.time.Clock()
 pygame.display.update()
 
 #creating engine and ball
+create_formations()
+
+for i, obj in enumerate(objects):
+    print(f"Object_{i}: {obj.name}, balls: {obj.vertices}")
+
+for i in objects:
+    print(f"memory adress: {i.vertices}")
+
+
 engine = Engine(gravity=(0, 500))
-create_formations(engine)
+
 
 run = True
 
@@ -32,7 +40,7 @@ while run:
             run = False
         elif event.type == pygame.MOUSEBUTTONDOWN:
             mouse_pos = Vector2(pygame.mouse.get_pos())
-            for b in engine.balls:
+            for b in balls:
                 if(b.position - mouse_pos).length() < 7:
                     engine.selected = b
                     engine.prev_mouse_pos = mouse_pos
@@ -46,12 +54,8 @@ while run:
                 engine.selected.velocity = velocity
                 engine.selected = None
                 engine.prev_mouse_pos = Vector2(0, 0)
-                for b in engine.objects[0]:
+                for b in balls:
                     b.colour = (255, 0, 0)
-                for b in engine.objects[1]:
-                    b.colour = (0, 0, 255)
-
-
 
 
     if engine.selected:
@@ -61,15 +65,14 @@ while run:
     engine.update(dt)
     screen.fill((0, 0, 0))
 
-    for b in engine.balls:
+    for b in balls:
         pygame.draw.circle(screen,b.colour, b.position, 5)
         pygame.draw.circle(screen, b.colour, b.position, 5, 1)
     
-    for constraint in engine.constraints:
+    for constraint in constraints:
         pygame.draw.line(screen, (255, 255, 255), constraint.p1.position, constraint.p2.position, 1)
     
     pygame.display.update()
-
 
 
 pygame.quit()
