@@ -20,11 +20,11 @@ pygame.display.update()
 #creating engine and ball
 create_formations()
 
-for i, obj in enumerate(objects):
-    print(f"Object_{i}: {obj.name}, balls: {obj.vertices}")
+# for i, obj in enumerate(objects):
+#     print(f"Object_{i}: {obj.name}, balls: {obj.vertices}")
 
-for i in objects:
-    print(f"memory adress: {i.vertices}")
+# for i in objects:
+#     print(f"memory adress: {i.vertices}")
 
 
 engine = Engine(gravity=(0, 500))

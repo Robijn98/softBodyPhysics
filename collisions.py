@@ -56,11 +56,10 @@ def resolve_collision(balls, objects):
         
         #prevent self collision
         for obj in objects:
-            #print(f"pre if: {obj.name}")
+
             if ball in obj.vertices:
                 continue
             
-            #print(f"post if: {obj.name}")
 
             # loop every edge 
             dist = 1000
@@ -102,86 +101,48 @@ def resolve_collision(balls, objects):
                     closest_edge = (A, B)
 
                 if dist < radius:
-                    # collision
-                    print("Collision detected")
-                    print(f"dist: {dist}, A: {A.position}, B: {B.position}")
+                    # collision detected
                     
-                    print(f"collision object: {obj.name}")
+                    # project center onto AB:
+                    t = (ball.position - A.position).dot(AB)
+                    denom = AB.length_squared() + 1e-6 
+                    t /= denom
+                    t = max(0.0, min(1.0, t))
 
+                    closest = A.position + AB * t
+                    diff    = ball.position - closest
+                    penetration = radius - dist
 
+                    if penetration <= 0:
+                        continue 
 
+                    # collision normal
+                    if dist == 0:
+                        n = AB.normalize().rotate(90)
+                    else:
+                        n = diff.normalize()
 
-                # Y = B.position.y - A.position.y
-                # X = B.position.x - A.position.x
-                # numerator = (Y * ball.position.x) - (X * ball.position.y) + (B.position.x * A.position.y) - (A.position.x * B.position.y)
-                # numerator = abs(numerator)
-                # denomenator = math.sqrt(((Y * Y) + (X * X)))
-                # dist = numerator / denomenator
-     
-                # if dist < 10:
-                #     # collision
-                #     print("Collision detected")
-                #     print(f"dist: {dist}, A: {A.position}, B: {B.position}")
-                
+                    # relative velocity at the contact point
+                    v_edge  = A.velocity * (1-t) + B.velocity * t
+                    rel_vel = ball.velocity - v_edge
+                    vn = rel_vel.dot(n)
 
+                    if vn < 0:
+                        inv_m_edge = ((1-t)**2 + t**2) / mass_edge
+                        inv_m = mass_ball + inv_m_edge
 
+                        # normal impulse magnitude
+                        numerator = -(1 + restitution) * vn
+                        denominator = (1/ 2) + (i + t) ** 2 * (1/6)
+                        j_mag = numerator / denominator
+                        
+                        j = n * j_mag
 
+                        # apply to ball and edge endpoints
+                        ball.velocity += j / mass_ball
+                        A.velocity    -= j * (1-t)  /mass_edge
+                        B.velocity    -= j *    t  /mass_edge
 
-                # A = obj[i]
-                # # modulus to loop back to the first point
-                # B = obj[(i+1) % len(obj)]
-                # AB = B.position - A.position
-
-                # # project center onto AB:
-                # t = (ball.position - A.position).dot(AB)
-                # denom = AB.length_squared() + 1e-6 
-                # t /= denom
-                # t = max(0.0, min(1.0, t))
-
-                # closest = A.position + AB * t
-                # diff    = ball.position - closest
-                # dist    = diff.length()
-                # penetration = radius - dist
-
-                # if penetration <= 0:
-                #     continue 
-
-                # # collision normal
-                # if dist == 0:
-                #     n = AB.normalize().rotate(90)
-                # else:
-                #     n = diff.normalize()
-
-                # # relative velocity at the contact point
-                # v_edge  = A.velocity * (1-t) + B.velocity * t
-                # rel_vel = ball.velocity - v_edge
-                # vn = rel_vel.dot(n)
-
-                # print(f"vn: {vn}, penetration: {penetration}, t: {t}, A: {A.position}, B: {B.position}")
-                # if vn < 0:
-                #     inv_m_edge = ((1-t)**2 + t**2) / mass_edge
-                #     inv_m = mass_ball + inv_m_edge
-
-                #     # normal impulse magnitude
-                #     numerator = -(1 + restitution) * vn
-                #     denominator = (1/ 2) + (i + t) ** 2 * (1/6)
-                #     j_mag = numerator / denominator
-                    
-                #     j = n * j_mag
-
-                #     # apply to ball and edge endpoints
-                #     ball.velocity += j / mass_ball
-                #     A.velocity    -= j * (1-t)  /mass_edge
-                #     B.velocity    -= j *    t  /mass_edge
-
-                # if penetration > 0.01:
-                #     # apply penetration correction
-
-                #     correction = n * (penetration) * (1 - restitution )
-
-                #     ball.position += correction / mass_ball
-                #     A.position    -= correction * (1-t) / mass_edge
-                #     B.position    -= correction *    t  / mass_edge
 
 
 

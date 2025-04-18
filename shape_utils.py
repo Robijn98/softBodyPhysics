@@ -20,7 +20,8 @@ class SoftBodyObj():
 def create_formations():
     create_square( start_pos=Vector2(100, 100), size=30)
     create_triangle(start_pos=Vector2(300, 300), size=30)
-    #create_square( start_pos=Vector2(500, 500), size=30)
+    create_triangle(start_pos=Vector2(500, 300), size=30)
+    create_circle(start_pos=Vector2(700, 300), size=30, num_balls=6)
 
 
 
@@ -86,3 +87,31 @@ def create_triangle(start_pos = Vector2(100, 100), size = 30):
     d = distance_constraint(balls[ball_count + 2],balls[ball_count], rest_length)
     constraints.append(d)
 
+
+def create_circle(start_pos = Vector2(100, 100), size = 30, num_balls = 10):
+    circle = []
+
+    #create balls in a circle formation
+    for i in range(num_balls):
+        angle = (2 * math.pi / num_balls) * i
+        x = start_pos.x + size * math.cos(angle)
+        y = start_pos.y + size * math.sin(angle)
+        balls.append(Ball(position=Vector2(x, y)))
+
+    balls.append(Ball(position=start_pos)) # add center ball
+
+    ball_count = len(balls) - num_balls - 1 # -1 for center ball
+    
+    for i in range(num_balls):
+        circle.append(balls[i + ball_count])
+    
+    objects.append(SoftBodyObj("circle", circle))
+
+    #apply constraints
+    rest_length = size / num_balls
+    for i in range(num_balls):
+        d = distance_constraint(balls[ball_count + i], balls[ball_count + (i + 1) % num_balls], rest_length)
+        constraints.append(d)
+       #constraint to center ball
+        d = distance_constraint(balls[ball_count + i], balls[ball_count + num_balls], rest_length)
+        constraints.append(d)
