@@ -58,7 +58,9 @@ to hold on to the objects indefintely for best results.
 <!-- ACKNOWLEDGMENTS -->
 ## Acknowledgments
 N. Lisitsa, 2023, Making a 2D soft-body physics engine, available from: https://lisyarus.github.io/blog/posts/soft-body-physics.html
+
 T. FitzRandolph, 2022, Deep Dive: The soft body physics of JellyCar, explained, available from: https://www.gamedeveloper.com/programming/deep-dive-the-soft-body-physics-of-jelly-car-explained
+
 GeeksForGeeks, 2024, Minimum distance from a point to the line segment using Vectors, available from: https://www.geeksforgeeks.org/minimum-distance-from-a-point-to-the-line-segment-using-vectors/
 
 
