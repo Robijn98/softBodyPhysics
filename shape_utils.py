@@ -1,5 +1,5 @@
 from pygame.math import Vector2
-from spring import distance_constraint
+from spring import Spring
 import math 
 from settings import *
 
@@ -21,7 +21,7 @@ def create_formations():
     create_square( start_pos=Vector2(100, 100), size=30)
     create_triangle(start_pos=Vector2(300, 300), size=30)
     create_triangle(start_pos=Vector2(500, 300), size=30)
-    create_circle(start_pos=Vector2(700, 300), size=30, num_balls=6)
+    #create_circle(start_pos=Vector2(700, 300), size=30, num_balls=6)
 
 
 
@@ -45,20 +45,20 @@ def create_square(start_pos = Vector2(100, 100), size = 30):
     #check how many balls already exist in the engine
 
     
-    #apply constraints
+    #apply spring_points
     rest_length = size  
-    d = distance_constraint(balls[ball_count],balls[ball_count + 1], rest_length)
-    constraints.append(d)
-    d = distance_constraint(balls[ball_count + 1],balls[ball_count + 2], rest_length)
-    constraints.append(d)
-    d = distance_constraint(balls[ball_count + 2],balls[ball_count + 3], rest_length)
-    constraints.append(d)
-    d = distance_constraint(balls[ball_count + 3],balls[ball_count], rest_length)
-    constraints.append(d)
-    d = distance_constraint(balls[ball_count],balls[ball_count + 2], rest_length)
-    constraints.append(d)
-    d = distance_constraint(balls[ball_count + 1],balls[ball_count + 3], rest_length)
-    constraints.append(d)
+    d = Spring(balls[ball_count],balls[ball_count + 1], rest_length)
+    spring_points.append(d)
+    d = Spring(balls[ball_count + 1],balls[ball_count + 2], rest_length)
+    spring_points.append(d)
+    d = Spring(balls[ball_count + 2],balls[ball_count + 3], rest_length)
+    spring_points.append(d)
+    d = Spring(balls[ball_count + 3],balls[ball_count], rest_length)
+    spring_points.append(d)
+    d = Spring(balls[ball_count],balls[ball_count + 2], rest_length)
+    spring_points.append(d)
+    d = Spring(balls[ball_count + 1],balls[ball_count + 3], rest_length)
+    spring_points.append(d)
 
 
 
@@ -78,14 +78,14 @@ def create_triangle(start_pos = Vector2(100, 100), size = 30):
     objects.append(SoftBodyObj("triangle", triangle))
 
 
-    #apply constraints
+    #apply spring_points
     rest_length = size
-    d = distance_constraint(balls[ball_count],balls[ball_count + 1], rest_length)
-    constraints.append(d)
-    d = distance_constraint(balls[ball_count + 1],balls[ball_count + 2], rest_length)
-    constraints.append(d)
-    d = distance_constraint(balls[ball_count + 2],balls[ball_count], rest_length)
-    constraints.append(d)
+    d = Spring(balls[ball_count],balls[ball_count + 1], rest_length)
+    spring_points.append(d)
+    d = Spring(balls[ball_count + 1],balls[ball_count + 2], rest_length)
+    spring_points.append(d)
+    d = Spring(balls[ball_count + 2],balls[ball_count], rest_length)
+    spring_points.append(d)
 
 
 def create_circle(start_pos = Vector2(100, 100), size = 30, num_balls = 10):
@@ -107,11 +107,11 @@ def create_circle(start_pos = Vector2(100, 100), size = 30, num_balls = 10):
     
     objects.append(SoftBodyObj("circle", circle))
 
-    #apply constraints
+    #apply spring_points
     rest_length = size / num_balls
     for i in range(num_balls):
-        d = distance_constraint(balls[ball_count + i], balls[ball_count + (i + 1) % num_balls], rest_length)
-        constraints.append(d)
+        d = Spring(balls[ball_count + i], balls[ball_count + (i + 1) % num_balls], rest_length)
+        spring_points.append(d)
        #constraint to center ball
-        d = distance_constraint(balls[ball_count + i], balls[ball_count + num_balls], rest_length)
-        constraints.append(d)
+        d = Spring(balls[ball_count + i], balls[ball_count + num_balls], rest_length)
+        spring_points.append(d)

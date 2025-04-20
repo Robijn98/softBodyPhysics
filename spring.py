@@ -1,6 +1,6 @@
 import math
 
-class distance_constraint():
+class Spring():
     def __init__(self, p1, p2, distance):
         self.p1 = p1
         self.p2 = p2
@@ -8,7 +8,7 @@ class distance_constraint():
         self.spring_damping = 200
         self.spring_force = 5000
 
-    def constrain(self, dt, gravity):
+    def create_spring(self, dt, gravity):
  
         p0 = self.p1.position
         p1 = self.p2.position

@@ -20,13 +20,6 @@ pygame.display.update()
 #creating engine and ball
 create_formations()
 
-# for i, obj in enumerate(objects):
-#     print(f"Object_{i}: {obj.name}, balls: {obj.vertices}")
-
-# for i in objects:
-#     print(f"memory adress: {i.vertices}")
-
-
 engine = Engine(gravity=(0, 500))
 
 
@@ -69,7 +62,7 @@ while run:
         pygame.draw.circle(screen,b.colour, b.position, 5)
         pygame.draw.circle(screen, b.colour, b.position, 5, 1)
     
-    for constraint in constraints:
+    for constraint in spring_points:
         pygame.draw.line(screen, (255, 255, 255), constraint.p1.position, constraint.p2.position, 1)
     
     pygame.display.update()

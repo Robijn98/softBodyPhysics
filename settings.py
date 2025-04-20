@@ -7,5 +7,5 @@ fps = 0
 frame = pygame.time.Clock()
 
 balls = []
-constraints = []
+spring_points = []
 objects = []
