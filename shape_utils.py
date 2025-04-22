@@ -2,6 +2,7 @@ from pygame.math import Vector2
 from spring import Spring
 import math 
 from settings import *
+from connections import create_joint
 
 class Ball():
     def __init__(self, position):
@@ -23,14 +24,16 @@ class SoftBodyObj():
         center /= len(self.vertices)
         for vertex in self.vertices:
             vertex.rest_position = vertex.position - center
-            print(f"Vertex {vertex.position} rest position: {vertex.rest_position}")
 
 
 def create_formations():
     #create_square( start_pos=Vector2(100, 100), size=30)
-    #create_triangle(start_pos=Vector2(300, 300), size=30)
-    create_triangle(start_pos=Vector2(500, 300), size=30)
-    create_circle(start_pos=Vector2(300, 300), size=30, num_balls=10)
+    create_triangle(start_pos=Vector2(100, 100), size=40)
+    #create_wheel(start_pos=Vector2(300, 300), size=30, num_balls=10)
+    create_wheel(start_pos=Vector2(300, 300), size=60, num_balls=10)
+    # create_wheel(start_pos=Vector2(300, 300), size=50, num_balls=10)
+    # create_joint(objects[0].vertices[10], objects[1].vertices[10])
+
 
 
 
@@ -66,12 +69,10 @@ def create_square(start_pos = Vector2(100, 100), size = 30):
     spring_points.append(d)
     d = Spring(balls[ball_count + 3],balls[ball_count], rest_length)
     spring_points.append(d)
-    # d = Spring(balls[ball_count],balls[ball_count + 2], rest_length)
-    # spring_points.append(d)
-    # d = Spring(balls[ball_count + 1],balls[ball_count + 3], rest_length)
-    # spring_points.append(d)
-
-
+    d = Spring(balls[ball_count],balls[ball_count + 2], rest_length)
+    spring_points.append(d)
+    d = Spring(balls[ball_count + 1],balls[ball_count + 3], rest_length)
+    spring_points.append(d)
 
 def create_triangle(start_pos = Vector2(100, 100), size = 30):
     triangle = []
@@ -100,6 +101,36 @@ def create_triangle(start_pos = Vector2(100, 100), size = 30):
     d = Spring(balls[ball_count + 2],balls[ball_count], rest_length)
     spring_points.append(d)
 
+def create_wheel(start_pos = Vector2(100, 100), size = 30, num_balls = 10):
+    wheel = []
+
+    #create balls in a circle formation
+    for i in range(num_balls):
+        angle = (2 * math.pi / num_balls) * i
+        x = start_pos.x + size * math.cos(angle)
+        y = start_pos.y + size * math.sin(angle)
+        balls.append(Ball(position=Vector2(x, y)))
+
+    balls.append(Ball(position=start_pos)) # add center ball
+
+    ball_count = len(balls) - num_balls - 1 
+    
+    for i in range(num_balls):
+        wheel.append(balls[i + ball_count])
+    wheel.append(balls[ball_count + num_balls]) # add center ball to wheel
+    
+    softbody = SoftBodyObj("wheel", wheel)
+    softbody.initialize_softBody()
+    objects.append(softbody)
+
+    #apply spring_points
+    rest_length = size / num_balls
+    for i in range(num_balls):
+        d = Spring(balls[ball_count + i], balls[ball_count + (i + 1) % num_balls], rest_length)
+        spring_points.append(d)
+       #constraint to center ball
+        d = Spring(balls[ball_count + i], balls[ball_count + num_balls], rest_length)
+        spring_points.append(d)
 
 def create_circle(start_pos = Vector2(100, 100), size = 30, num_balls = 10):
     circle = []
@@ -111,9 +142,8 @@ def create_circle(start_pos = Vector2(100, 100), size = 30, num_balls = 10):
         y = start_pos.y + size * math.sin(angle)
         balls.append(Ball(position=Vector2(x, y)))
 
-    balls.append(Ball(position=start_pos)) # add center ball
 
-    ball_count = len(balls) - num_balls - 1 # -1 for center ball
+    ball_count = len(balls) - num_balls 
     
     for i in range(num_balls):
         circle.append(balls[i + ball_count])
@@ -127,6 +157,5 @@ def create_circle(start_pos = Vector2(100, 100), size = 30, num_balls = 10):
     for i in range(num_balls):
         d = Spring(balls[ball_count + i], balls[ball_count + (i + 1) % num_balls], rest_length)
         spring_points.append(d)
-       #constraint to center ball
-        d = Spring(balls[ball_count + i], balls[ball_count + num_balls], rest_length)
-        spring_points.append(d)
+
+

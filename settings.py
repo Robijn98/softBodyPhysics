@@ -10,3 +10,4 @@ frame = pygame.time.Clock()
 balls = []
 spring_points = []
 objects = []
+joints = []

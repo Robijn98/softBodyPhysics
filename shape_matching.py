@@ -30,5 +30,18 @@ def shape_matching(obj, dt, springforce):
         v.velocity += delta * springforce * dt
 
 
+def pressure_force(obj, dt, pressureforce):
+    # find center of object
+    center = Vector2(0, 0)
+    for v in obj.vertices:
+        center += v.position
+    center /= len(obj.vertices)
 
+    # find pressure force
+    for v in obj.vertices:
+        r = v.position - center  
+        q = v.rest_position     
+        target = center + q
+        delta = target - v.position
+        v.velocity += delta * pressureforce * dt
     

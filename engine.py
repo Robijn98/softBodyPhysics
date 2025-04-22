@@ -4,8 +4,8 @@ import math
 import random
 import sys
 from collisions import resolve_collision
-from settings import balls, spring_points, objects
-from shape_matching import shape_matching
+from settings import *
+from shape_matching import shape_matching, pressure_force
 
 class Engine():
     def __init__(self, gravity, radius=5):
@@ -29,7 +29,13 @@ class Engine():
 
         for i in objects:
             shape_matching(i, dt, 500)
+         
+        #constraints
         
+        for joint in joints:
+            joint.connect()
+
+
         resolve_collision(balls=balls, objects=objects)
 
 
