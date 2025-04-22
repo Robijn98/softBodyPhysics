@@ -4,9 +4,9 @@ class Spring():
     def __init__(self, p1, p2, distance):
         self.p1 = p1
         self.p2 = p2
-        self.rest_length = 100
-        self.spring_damping = 200
-        self.spring_force = 5000
+        self.rest_length = (p2.position - p1.position).length()
+        self.spring_damping = 20
+        self.spring_force = 500
 
     def create_spring(self, dt, gravity):
  

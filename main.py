@@ -5,8 +5,10 @@ import sys
 from settings import *
 from engine import Engine
 from shape_utils import create_formations
+from shape_matching import shape_matching
 
 # set up the screen
+
 pygame.init()
 
 pygame.display.set_caption("2D soft body simulation")
@@ -19,6 +21,7 @@ pygame.display.update()
 
 #creating engine and ball
 create_formations()
+
 
 engine = Engine(gravity=(0, 500))
 
@@ -62,6 +65,23 @@ while run:
         pygame.draw.circle(screen,b.colour, b.position, 5)
         pygame.draw.circle(screen, b.colour, b.position, 5, 1)
     
+    if display_rest_pos == True:
+        for obj in objects:
+            center = sum((v.position for v in obj.vertices), Vector2()) / len(obj.vertices)
+            A = 0
+            B = 0
+            for v in obj.vertices:
+                r = v.position - center
+                q = v.rest_position
+                A += r.dot(q)
+                B += r.cross(q)
+            angle = -math.atan2(B, A)
+
+            for v in obj.vertices:
+                target = center + v.rest_position.rotate(angle)
+                pygame.draw.circle(screen, (0, 255, 0), target, 3)
+
+
     for constraint in spring_points:
         pygame.draw.line(screen, (255, 255, 255), constraint.p1.position, constraint.p2.position, 1)
     

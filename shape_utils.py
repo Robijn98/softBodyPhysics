@@ -8,6 +8,7 @@ class Ball():
         self.position = Vector2(position)
         self.velocity = Vector2(0, 0)
         self.colour=(255,0,0)
+        self.rest_position = None
 
 
 class SoftBodyObj():
@@ -15,13 +16,21 @@ class SoftBodyObj():
         self.name = name
         self.vertices = vertices
         
+    def initialize_softBody(self):
+        center = Vector2(0, 0)
+        for vertex in self.vertices:
+            center += vertex.position
+        center /= len(self.vertices)
+        for vertex in self.vertices:
+            vertex.rest_position = vertex.position - center
+            print(f"Vertex {vertex.position} rest position: {vertex.rest_position}")
 
 
 def create_formations():
-    create_square( start_pos=Vector2(100, 100), size=30)
-    create_triangle(start_pos=Vector2(300, 300), size=30)
+    #create_square( start_pos=Vector2(100, 100), size=30)
+    #create_triangle(start_pos=Vector2(300, 300), size=30)
     create_triangle(start_pos=Vector2(500, 300), size=30)
-    #create_circle(start_pos=Vector2(700, 300), size=30, num_balls=6)
+    create_circle(start_pos=Vector2(300, 300), size=30, num_balls=10)
 
 
 
@@ -40,7 +49,9 @@ def create_square(start_pos = Vector2(100, 100), size = 30):
     for i in range(4):
         square.append(balls[i + ball_count])
     
-    objects.append(SoftBodyObj("square", square))
+    softbody = SoftBodyObj("square", square)
+    softbody.initialize_softBody()
+    objects.append(softbody)
 
     #check how many balls already exist in the engine
 
@@ -55,10 +66,10 @@ def create_square(start_pos = Vector2(100, 100), size = 30):
     spring_points.append(d)
     d = Spring(balls[ball_count + 3],balls[ball_count], rest_length)
     spring_points.append(d)
-    d = Spring(balls[ball_count],balls[ball_count + 2], rest_length)
-    spring_points.append(d)
-    d = Spring(balls[ball_count + 1],balls[ball_count + 3], rest_length)
-    spring_points.append(d)
+    # d = Spring(balls[ball_count],balls[ball_count + 2], rest_length)
+    # spring_points.append(d)
+    # d = Spring(balls[ball_count + 1],balls[ball_count + 3], rest_length)
+    # spring_points.append(d)
 
 
 
@@ -75,7 +86,9 @@ def create_triangle(start_pos = Vector2(100, 100), size = 30):
     for i in range(3):
         triangle.append(balls[i + ball_count])
     
-    objects.append(SoftBodyObj("triangle", triangle))
+    softbody = SoftBodyObj("triangle", triangle)
+    softbody.initialize_softBody()
+    objects.append(softbody)
 
 
     #apply spring_points
@@ -105,7 +118,9 @@ def create_circle(start_pos = Vector2(100, 100), size = 30, num_balls = 10):
     for i in range(num_balls):
         circle.append(balls[i + ball_count])
     
-    objects.append(SoftBodyObj("circle", circle))
+    softbody = SoftBodyObj("circle", circle)
+    softbody.initialize_softBody()
+    objects.append(softbody)
 
     #apply spring_points
     rest_length = size / num_balls

@@ -5,6 +5,7 @@ import random
 import sys
 from collisions import resolve_collision
 from settings import balls, spring_points, objects
+from shape_matching import shape_matching
 
 class Engine():
     def __init__(self, gravity, radius=5):
@@ -25,5 +26,10 @@ class Engine():
         for p in balls:
             p.position += p.velocity * dt
 
+
+        for i in objects:
+            shape_matching(i, dt, 500)
         
         resolve_collision(balls=balls, objects=objects)
+
+
