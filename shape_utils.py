@@ -5,17 +5,19 @@ from settings import *
 from connections import create_joint
 
 class Ball():
-    def __init__(self, position):
+    def __init__(self, position, static=False):
         self.position = Vector2(position)
         self.velocity = Vector2(0, 0)
         self.colour=(255,0,0)
         self.rest_position = None
+        self.static = static
 
 
 class SoftBodyObj():
-    def __init__(self, name, vertices):
+    def __init__(self, name, vertices, static=False):
         self.name = name
         self.vertices = vertices
+        self.static = static
         
     def initialize_softBody(self):
         center = Vector2(0, 0)
@@ -28,11 +30,12 @@ class SoftBodyObj():
 
 def create_formations():
     #create_square( start_pos=Vector2(100, 100), size=30)
-    create_triangle(start_pos=Vector2(100, 100), size=40)
+    create_triangle(start_pos=Vector2(200, 200), size=40)
     #create_wheel(start_pos=Vector2(300, 300), size=30, num_balls=10)
     create_wheel(start_pos=Vector2(300, 300), size=60, num_balls=10)
     # create_wheel(start_pos=Vector2(300, 300), size=50, num_balls=10)
     # create_joint(objects[0].vertices[10], objects[1].vertices[10])
+    create_platform(start_pos=Vector2(400, 400), size=50)
 
 
 
@@ -158,4 +161,39 @@ def create_circle(start_pos = Vector2(100, 100), size = 30, num_balls = 10):
         d = Spring(balls[ball_count + i], balls[ball_count + (i + 1) % num_balls], rest_length)
         spring_points.append(d)
 
+def create_platform(start_pos = Vector2(100, 100), size = 30):
+    platform = []
 
+    #create balls in a square formation
+    balls.append(Ball(position=start_pos, static=True))
+    balls.append(Ball(position=start_pos + Vector2(size*3, 0), static=True)) 
+    balls.append(Ball(position=start_pos + Vector2(size*3, size), static=True))
+    balls.append(Ball(position=start_pos + Vector2(0, size), static=True))
+
+    ball_count = len(balls) - 4
+
+    
+    for i in range(4):
+        platform.append(balls[i + ball_count])
+    
+    softbody = SoftBodyObj("platform", platform, static=True)
+    softbody.initialize_softBody()
+    objects.append(softbody)
+
+    #check how many balls already exist in the engine
+
+    
+    #apply spring_points
+    rest_length = size  
+    d = Spring(balls[ball_count],balls[ball_count + 1], rest_length, spring_gravity=False)
+    spring_points.append(d)
+    d = Spring(balls[ball_count + 1],balls[ball_count + 2], rest_length, spring_gravity=False)
+    spring_points.append(d)
+    d = Spring(balls[ball_count + 2],balls[ball_count + 3], rest_length, spring_gravity=False)
+    spring_points.append(d)
+    d = Spring(balls[ball_count + 3],balls[ball_count], rest_length, spring_gravity=False)
+    spring_points.append(d)
+    d = Spring(balls[ball_count],balls[ball_count + 2], rest_length, spring_gravity=False)
+    spring_points.append(d)
+    d = Spring(balls[ball_count + 1],balls[ball_count + 3], rest_length, spring_gravity=False)
+    spring_points.append(d)

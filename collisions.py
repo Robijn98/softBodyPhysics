@@ -36,6 +36,85 @@ def collision_with_environment(ball):
         if abs(ball.velocity.x) < 2:
             ball.velocity.x = 0
     
+def collision_with_static(balls, objects):
+    radius = 5
+    restitution = 0.5
+    friction = 0.8
+
+    for ball in balls:
+        if ball.static:
+            continue
+        for obj in objects:
+            if not obj.static:
+                continue
+
+            closest_dist = 1000
+            closest_edge = None
+            closest_t = 0
+
+            for i in range(len(obj.vertices)):
+                A = obj.vertices[i]
+                B = obj.vertices[(i + 1) % len(obj.vertices)]
+
+                AB = B.position - A.position
+                AE = ball.position - A.position
+                BE = ball.position - B.position
+
+                AB_BE = AB.dot(BE)
+                AB_AE = AB.dot(AE)
+
+                if AB_BE > 0:
+                    t = (ball.position - B.position).length()
+                elif AB_AE < 0:
+                    t = (ball.position - A.position).length()
+                else:
+                    x1, y1 = AB.x, AB.y
+                    x2, y2 = AE.x, AE.y
+                    mod = math.sqrt(x1**2 + y1**2)
+                    t = abs(x1 * y2 - x2 * y1) / mod
+
+                if t < closest_dist:
+                    closest_dist = t
+                    closest_edge = (A, B)
+
+            if closest_dist < radius:
+                # We have a collision
+
+                A, B = closest_edge
+                AB = B.position - A.position
+                AE = ball.position - A.position
+
+                ab_len2 = AB.length_squared()
+                t = AE.dot(AB) / (ab_len2 + 1e-6)
+                t = max(0.0, min(1.0, t))
+
+                closest_point = A.position + AB * t
+                diff = ball.position - closest_point
+
+                if diff.length_squared() == 0:
+                    n = AB.normalize().rotate(90) 
+                else:
+                    n = diff.normalize()
+
+                # push ball out
+                penetration = radius - closest_dist
+                ball.position += n * penetration
+
+                # bounce
+                vn = ball.velocity.dot(n)
+                if vn < 0:
+                    ball.velocity -= (1 + restitution) * vn * n
+
+                # Friction
+                vt = ball.velocity - ball.velocity.dot(n) * n
+                ball.velocity -= vt * (1 - friction)
+
+                # Small velocity kill
+                if abs(ball.velocity.x) < 0.5:
+                    ball.velocity.x = 0
+                if abs(ball.velocity.y) < 0.5:
+                    ball.velocity.y = 0
+
 
 
 def resolve_collision(balls, objects):
@@ -45,10 +124,8 @@ def resolve_collision(balls, objects):
     restitution = 0.5
     friction = 0.8
 
-    # only loop each unordered pair once
     mass_ball = 1.0
     mass_edge = 2.0
-
 
     for ball in balls:
         
@@ -57,18 +134,15 @@ def resolve_collision(balls, objects):
         #prevent self collision
         for obj in objects:
 
-            if ball in obj.vertices:
+            if ball in obj.vertices or obj.static:
                 continue
-            
-
+                
             # loop every edge 
             dist = 1000
             closest_edge = (0, 0)
             for i in range(len(obj.vertices)):
                 
                 #if any point of the object is inside the ball, ignore collision
-
-
                 A = obj.vertices[i]
                 B = obj.vertices[(i+1) % len(obj.vertices)]
                 
@@ -122,7 +196,7 @@ def resolve_collision(balls, objects):
                     else:
                         n = diff.normalize()
 
-                    # relative velocity at the contact point
+                    # relative velocity at ] contact point
                     v_edge  = A.velocity * (1-t) + B.velocity * t
                     rel_vel = ball.velocity - v_edge
                     vn = rel_vel.dot(n)
@@ -139,31 +213,8 @@ def resolve_collision(balls, objects):
                         j = n * j_mag
 
                         # apply to ball and edge endpoints
-                        ball.velocity += j / mass_ball
-                        A.velocity    -= j * (1-t)  /mass_edge
-                        B.velocity    -= j *    t  /mass_edge
+                        ball.velocity += j / mass_ball * friction
+                        A.velocity    -= j * (1-t)  /mass_edge * friction
+                        B.velocity    -= j *    t  /mass_edge 
 
 
-
-
-def point_in_object(point, object):
-    inside = False
-    x, y = point
-
-    for i in range(len(object)):
-        j = (i + 1) % len(object)
-        xi, yi = object[i].position
-        xj, yj = object[j].position
-
-        intersect = ((yi > y) != (yj > y)) and \
-                    (x < (xj - xi) * (y - yi) / (yj - yi + 1e-6) + xi)
-        if intersect:
-            inside = not inside
-
-    return inside
-
-def vertex_in_object(point, object):
-    for i in range(len(object)):
-        if point == object[i].position:
-            return True
-    return False

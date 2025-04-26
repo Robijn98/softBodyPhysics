@@ -1,9 +1,6 @@
 import pygame
 from pygame.math import Vector2
-import math
-import random
-import sys
-from collisions import resolve_collision
+from collisions import resolve_collision, collision_with_static
 from settings import *
 from shape_matching import shape_matching, pressure_force
 
@@ -24,8 +21,9 @@ class Engine():
             c.create_spring(dt, self.gravity)
 
         for p in balls:
-            p.position += p.velocity * dt
-
+            if p.static == False:
+                p.position += p.velocity * dt
+            
 
         for i in objects:
             shape_matching(i, dt, 500)
@@ -37,5 +35,6 @@ class Engine():
 
 
         resolve_collision(balls=balls, objects=objects)
+        collision_with_static(balls=balls, objects=objects)
 
 

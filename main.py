@@ -22,9 +22,7 @@ pygame.display.update()
 #creating engine and ball
 create_formations()
 
-
 engine = Engine(gravity=(0, 500))
-
 
 run = True
 
@@ -37,12 +35,13 @@ while run:
         elif event.type == pygame.MOUSEBUTTONDOWN:
             mouse_pos = Vector2(pygame.mouse.get_pos())
             for b in balls:
-                if(b.position - mouse_pos).length() < 7:
-                    engine.selected = b
-                    engine.prev_mouse_pos = mouse_pos
-                    b.velocity = Vector2(0, 0)
-                    b.colour = (0, 255, 0)
-                    break
+                if b.static == False:
+                    if(b.position - mouse_pos).length() < 7:
+                        engine.selected = b
+                        engine.prev_mouse_pos = mouse_pos
+                        b.velocity = Vector2(0, 0)
+                        b.colour = (0, 255, 0)
+                        break
         elif event.type == pygame.MOUSEBUTTONUP:
             if engine.selected:
                 current_mouse_pos = Vector2(pygame.mouse.get_pos())

@@ -1,12 +1,13 @@
 import math
 
 class Spring():
-    def __init__(self, p1, p2, distance):
+    def __init__(self, p1, p2, distance, spring_gravity=True):
         self.p1 = p1
         self.p2 = p2
         self.rest_length = (p2.position - p1.position).length()
         self.spring_damping = 20
         self.spring_force = 500
+        self.spring_gravity = spring_gravity
 
     def create_spring(self, dt, gravity):
  
@@ -25,11 +26,13 @@ class Spring():
 
         force = self.spring_force * (required_delta - delta)
 
+
         self.p1.velocity -= force * dt
         self.p2.velocity += force * dt
 
         #add gravity
-        self.p1.velocity += gravity * dt
+        if self.spring_gravity:
+            self.p1.velocity += gravity * dt
 
         # Damping
         vrel = (v1 - v0).dot(direction)
