@@ -51,7 +51,7 @@ to hold on to the objects indefintely for best results.
 - [x] Create springs
 - [x] Collision detection
 - [x] Interactive shapes 
-- [ ] Shapematching
+- [x] Shapematching
 - [ ] Have a UI for inputs
 - [ ] Ability to create shapes yourself
 
