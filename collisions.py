@@ -1,5 +1,6 @@
 from settings import *
 import math
+from pygame.math import Vector2
 
 def collision_with_environment(ball):
     radius = 5
@@ -116,6 +117,39 @@ def collision_with_static(balls, objects):
                     ball.velocity.y = 0
 
 
+            # Check for collision with each vertex
+            for vertex in obj.vertices:
+                diff = ball.position - vertex.position
+                dist = diff.length()
+
+                if dist < radius:
+                    #collision detected 
+                    penetration = radius - dist
+                    if dist == 0:
+                        n = Vector2(0, -1) 
+                    else:
+                        n = diff.normalize()
+
+                    # Push ball
+                    ball.position += n * penetration
+
+                    #velocity
+                    vn = ball.velocity.dot(n)
+                    if vn < 0:
+                        ball.velocity -= (1 + restitution) * vn * n
+
+                    # Friction
+                    vt = ball.velocity - ball.velocity.dot(n) * n
+                    ball.velocity -= vt * (1 - friction)
+
+                    if abs(ball.velocity.x) < 0.5:
+                        ball.velocity.x = 0
+                    if abs(ball.velocity.y) < 0.5:
+                        ball.velocity.y = 0
+
+
+
+
 
 def resolve_collision(balls, objects):
     
@@ -216,5 +250,36 @@ def resolve_collision(balls, objects):
                         ball.velocity += j / mass_ball * friction
                         A.velocity    -= j * (1-t)  /mass_edge * friction
                         B.velocity    -= j *    t  /mass_edge 
+
+            # Check for collision with each vertex
+            for vertex in obj.vertices:
+                diff = ball.position - vertex.position
+                dist = diff.length()
+
+                if dist < radius:
+                    # Collision 
+                    penetration = radius - dist
+                    if dist == 0:
+                        n = Vector2(0, -1)  
+                    else:
+                        n = diff.normalize()
+
+                    # Push ball 
+                    ball.position += n * penetration
+
+                    #  velocity
+                    vn = ball.velocity.dot(n)
+                    if vn < 0:
+                        ball.velocity -= (1 + restitution) * vn * n
+
+                    # Friction
+                    vt = ball.velocity - ball.velocity.dot(n) * n
+                    ball.velocity -= vt * (1 - friction)
+
+
+                    if abs(ball.velocity.x) < 0.5:
+                        ball.velocity.x = 0
+                    if abs(ball.velocity.y) < 0.5:
+                        ball.velocity.y = 0
 
 

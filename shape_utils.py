@@ -30,7 +30,7 @@ class SoftBodyObj():
 
 def create_formations():
     #create_square( start_pos=Vector2(100, 100), size=30)
-    create_triangle(start_pos=Vector2(200, 200), size=40)
+    create_triangle(start_pos=Vector2(200, 200), size=60)
     #create_wheel(start_pos=Vector2(300, 300), size=30, num_balls=10)
     create_wheel(start_pos=Vector2(300, 300), size=60, num_balls=10)
     # create_wheel(start_pos=Vector2(300, 300), size=50, num_balls=10)
