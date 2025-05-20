@@ -30,13 +30,29 @@ class SoftBodyObj():
 
 def create_formations():
     #create_square( start_pos=Vector2(100, 100), size=30)
-    create_triangle(start_pos=Vector2(200, 200), size=60)
+    #create_triangle(start_pos=Vector2(200, 200), size=60)
     #create_wheel(start_pos=Vector2(300, 300), size=30, num_balls=10)
-    create_wheel(start_pos=Vector2(300, 300), size=60, num_balls=10)
+    #create_wheel(start_pos=Vector2(300, 300), size=60, num_balls=10)
     # create_wheel(start_pos=Vector2(300, 300), size=50, num_balls=10)
     # create_joint(objects[0].vertices[10], objects[1].vertices[10])
-    create_platform(start_pos=Vector2(400, 400), size=50)
+    #create_platform(start_pos=Vector2(400, 400), size=50)
+    
+    #create small squares
+    # x, y = 10, 10
+    # size = 20
+    # spacing = 40  # distance between squares
+    # squares_per_row = SCREEN_WIDTH // spacing
 
+    # for i in range(20):
+    #     if y > SCREEN_HEIGHT - size:
+    #         break
+
+    #     create_square(start_pos=Vector2(x, y), size=size)
+
+    #     x += spacing
+    #     if x > SCREEN_WIDTH - size:
+    #         x = 30
+    #         y += spacing
 
 
 
