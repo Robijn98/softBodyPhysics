@@ -34,7 +34,7 @@ To run you will need the following
 ### Installation
 Clone the repo
    ```sh
-   git clone https://github.com/Robijn98/softBodyPhysics.git
+   git clone git@github.com:Robijn98/softBodyPhysics.git
    ```
 <!-- USAGE EXAMPLES -->
 ## Usage
